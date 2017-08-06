@@ -55,24 +55,6 @@ UIWindow *originWindow;
     }
 }
 
--(NSString*) extractContentLabel:(NSDictionary*)userInfo{
-    NSObject *alertValue = userInfo[@"aps"][@"alert"];
-
-    if ([alertValue isKindOfClass:[NSString class]])
-        return alertValue;
-
-
-    if ([alertValue isKindOfClass:[NSDictionary class]]){
-        NSString *locKey = ((NSDictionary*)alertValue)[@"loc-key"];
-        if (locKey != nil)
-            return NSLocalizedString(locKey,nil);
-    }
-
-    @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                   reason:@"aps['alert'] field malformed: it is neither a string nor a dictionary with key 'loc-key'"
-                                 userInfo:nil];
-}
-
 -(void)setUserInfo:(NSDictionary *)userInfo{
     _userInfo = userInfo;
     UIImage *appIcon;
@@ -81,7 +63,7 @@ UIWindow *originWindow;
         appIcon = [UIImage imageNamed:@"AppIcon80x80"];
     }
     [self.icon_image setImage:appIcon];
-    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSDictionary *infoDictionary = [[NSBundle bundleForClass:[self class]] infoDictionary];
     // app名称
     NSString *appName = [infoDictionary objectForKey:@"CFBundleName"];
     if (!appName) {
@@ -91,9 +73,9 @@ UIWindow *originWindow;
     if (!appName) {
         assert(0);
     }
-    self.title_label.text   = appName;
-    self.content_label.text = [self extractContentLabel:userInfo];
-    self.time_label.text = EBBannerViewTimeText;
+    //self.title_label.text   = appName;
+    self.content_label.text = self.userInfo[@"aps"][@"alert"][@"body"];//@"fff";//self.userInfo[@"aps"][@"alert"];
+    //self.time_label.text = EBBannerViewTimeText;
     [originWindow makeKeyAndVisible];
     if (!self.isIos10) {
         self.time_label.textColor      = [UIImage colorAtPoint:self.time_label.center];
@@ -161,7 +143,7 @@ CGFloat originHeight;
     } completion:^(BOOL finished) {
         weakSelf.frame = CGRectMake(0, 0, ScreenWidth, bannerHeight);
     }];
-    [NSTimer scheduledTimerWithTimeInterval:BannerStayTime target:self selector:@selector(removeWithAnimation) userInfo:nil repeats:NO];
+    //[NSTimer scheduledTimerWithTimeInterval:BannerStayTime target:self selector:@selector(removeWithAnimation) userInfo:nil repeats:NO];
 }
 
 -(void)removeWithAnimation{
